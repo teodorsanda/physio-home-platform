@@ -1,5 +1,6 @@
 import { registerDocumentWorker } from "../lib/workers/document-ocr";
+import { logger } from "@/lib/utils/logger";
 
 registerDocumentWorker();
 
-console.info("Worker started");
+logger.info("Worker started");

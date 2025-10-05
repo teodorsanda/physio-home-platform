@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { bookingsSchemas } from "@/lib/sdk/schemas";
-import { buildResponse, parseJson, validateRequest } from "@/lib/validators/route";
+import { buildResponse, HttpError, parseJson, validateRequest } from "@/lib/validators/route";
 import { prisma } from "@/lib/prisma";
 
 interface Params {
@@ -11,6 +11,11 @@ export async function POST(req: NextRequest, { params }: Params) {
   const body = await parseJson(req);
   return buildResponse(async () => {
     const data = validateRequest(bookingsSchemas.checkin.body, body);
+    const booking = await prisma.booking.findUnique({ where: { id: params.id } });
+    if (!booking) {
+      throw new HttpError(404, "Booking not found");
+    }
+
     await prisma.checkIn.create({
       data: {
         bookingId: params.id,

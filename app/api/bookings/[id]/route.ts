@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { bookingsSchemas } from "@/lib/sdk/schemas";
-import { buildResponse } from "@/lib/validators/route";
+import { buildResponse, HttpError } from "@/lib/validators/route";
 import { prisma } from "@/lib/prisma";
 
 interface Params {
@@ -18,7 +18,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
       }
     });
     if (!booking) {
-      throw new Error("Booking not found");
+      throw new HttpError(404, "Booking not found");
     }
     return bookingsSchemas.byId.response.parse({
       id: booking.id,

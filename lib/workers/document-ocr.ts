@@ -1,5 +1,6 @@
 import { Queue, Worker } from "bullmq";
 import IORedis from "ioredis";
+import { logger } from "@/lib/utils/logger";
 
 const connection = new IORedis(process.env.REDIS_URL || "redis://localhost:6379");
 
@@ -9,12 +10,12 @@ export function registerDocumentWorker() {
   const worker = new Worker(
     "document-ocr",
     async (job) => {
-      console.info("Scanning document", job.id);
+      logger.info("Scanning document", { jobId: job.id });
       return { text: "Stub OCR text" };
     },
     { connection }
   );
-  worker.on("completed", (job) => console.info("Document processed", job.id));
-  worker.on("failed", (job, err) => console.error("Document failed", job?.id, err));
+  worker.on("completed", (job) => logger.info("Document processed", { jobId: job.id }));
+  worker.on("failed", (job, err) => logger.error("Document failed", { jobId: job?.id, error: err.message }));
   return worker;
 }

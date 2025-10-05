@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { patientSchemas } from "@/lib/sdk/schemas";
-import { buildResponse, parseJson, validateRequest } from "@/lib/validators/route";
+import { buildResponse, HttpError, parseJson, validateRequest } from "@/lib/validators/route";
 import { prisma } from "@/lib/prisma";
 
 const selectSummary = {
@@ -18,7 +18,7 @@ export async function GET() {
   return buildResponse(async () => {
     const patient = await prisma.patient.findFirst({ where: { deletedAt: null }, select: selectSummary });
     if (!patient) {
-      throw new Error("Patient not found");
+      throw new HttpError(404, "Patient not found");
     }
     return formatPatient(patient);
   });
@@ -30,7 +30,7 @@ export async function PUT(req: NextRequest) {
     const data = validateRequest(patientSchemas.me.body, body);
     const patient = await prisma.patient.findFirst({ where: { deletedAt: null } });
     if (!patient) {
-      throw new Error("Patient not found");
+      throw new HttpError(404, "Patient not found");
     }
     await prisma.patient.update({
       where: { id: patient.id },
@@ -38,7 +38,7 @@ export async function PUT(req: NextRequest) {
     });
     const refreshed = await prisma.patient.findUnique({ where: { id: patient.id }, select: selectSummary });
     if (!refreshed) {
-      throw new Error("Patient not found");
+      throw new HttpError(404, "Patient not found");
     }
     return formatPatient(refreshed);
   });

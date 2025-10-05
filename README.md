@@ -34,13 +34,30 @@ Copy `.env.example` to `.env.local` and adjust secrets as needed.
 cp .env.example .env.local
 ```
 
+| Key | Description | Default |
+| --- | --- | --- |
+| `DATABASE_URL` | PostgreSQL connection for Prisma | `postgresql://postgres:postgres@localhost:5432/physio` |
+| `DIRECT_URL` | Direct connection for migrations | `postgresql://postgres:postgres@localhost:5432/physio` |
+| `REDIS_URL` | Redis connection for queues/realtime | `redis://localhost:6379` |
+| `MINIO_ENDPOINT` | MinIO endpoint (S3 compatible) | `http://localhost:9000` |
+| `MINIO_ACCESS_KEY` / `MINIO_SECRET_KEY` | Object storage credentials | `minioadmin` |
+| `MINIO_BUCKET` | Bucket storing encrypted documents | `physio-docs` |
+| `NEXTAUTH_URL` | NextAuth base URL | `http://localhost:3000` |
+| `NEXTAUTH_SECRET` / `JWT_SECRET` | Auth secrets (change in prod) | `change-me` |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` | SMTP settings for transactional mail | `localhost` / `1025` / _empty_ |
+| `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_MESSAGING_SERVICE_SID` | Phone OTP integration stubs | `ACXXXX` / `XXXX` / `MGXXXX` |
+| `STRIPE_SECRET_KEY` / `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` / `STRIPE_WEBHOOK_SECRET` | Stripe test credentials | `sk_test_xxx` / `pk_test_xxx` / `whsec_xxx` |
+| `GOOGLE_MAPS_API_KEY` / `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Google Maps (server & client) | `AIza...` |
+| `NEXT_PUBLIC_API_BASE_URL` | Base URL for the typed REST SDK | `http://localhost:3000` |
+| `NEXT_PUBLIC_REALTIME_URL` | Socket.IO endpoint exposed to clients | `http://localhost:3000` |
+
 ### Makefile workflow
 The project ships with idempotent make targets:
 
 ```bash
 make docker-up       # start postgres, redis, minio, clamav, web, worker
 make migrate         # run Prisma migrations (deploy -> dev fallback)
-make seed            # populate demo data (3 cities, 10 therapists, 15 patients, 15 bookings)
+make seed            # populate demo data (3 cities, 10 therapists, 15 patients, 10 upcoming + 5 past bookings)
 make dev             # run Next.js dev server
 ```
 
@@ -56,7 +73,9 @@ make docker-up && sleep 10 && make migrate && make seed && make dev
 
 ### Scripts
 - `pnpm generate` – regenerates Prisma client and OpenAPI spec
-- `pnpm test` – run Vitest suite (unit, API schemas, UI smoke)
+- `pnpm test:unit` – unit coverage for utilities and guards
+- `pnpm test:api` – API route smoke/e2e coverage (auth, bookings, payments webhook)
+- `pnpm test:ui` – UI smoke assertions
 - `pnpm build` – Next.js production build
 
 ### Demo accounts
@@ -66,7 +85,7 @@ make docker-up && sleep 10 && make migrate && make seed && make dev
 | Therapist | therapist0@example.com | password |
 | Admin | admin@example.com | password |
 
-> Admin role is seeded manually when migrations are applied (see `scripts/seed.ts`).
+Seed data includes 3 Romanian metros, 10 therapists (5 male / 5 female), 15 patients, 10 upcoming bookings, and 5 historical visits with invoices and payments.
 
 ## Architecture highlights
 - **Prisma schema** under `/prisma/schema.prisma` defines RBAC-friendly models with soft delete fields.

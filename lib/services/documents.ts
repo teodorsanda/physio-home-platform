@@ -1,6 +1,7 @@
 import { sdk } from "@/lib/sdk";
+import { logger } from "@/lib/utils/logger";
 
 export async function uploadDocument(): Promise<void> {
   const { url, fields } = await sdk.patient.createDocumentUpload();
-  console.info("Upload using presigned URL", { url, fields: Object.keys(fields).length });
+  logger.info("Upload using presigned URL", { url, fieldCount: Object.keys(fields).length });
 }

@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { logger } from "@/lib/utils/logger";
 
 const schema = z.object({
   name: z.string().min(2),
@@ -22,7 +23,7 @@ export function ContactForm() {
   } = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema) });
 
   const onSubmit = async (data: z.infer<typeof schema>) => {
-    console.info("Support ticket", data);
+    logger.info("Support ticket", data);
     await new Promise((resolve) => setTimeout(resolve, 500));
     reset();
   };

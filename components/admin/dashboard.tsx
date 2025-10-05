@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { sdk } from "@/lib/sdk";
 import { Button } from "@/components/ui/button";
+import { logger } from "@/lib/utils/logger";
 import { DispatchBoard } from "@/components/admin/dispatch-board";
 import { Reports } from "@/components/admin/reports";
 import { TherapistApprovals } from "@/components/admin/therapist-approvals";
@@ -31,7 +32,7 @@ export function AdminDashboard() {
           <h1 className="text-3xl font-semibold text-slate-900">Operations dashboard</h1>
           <p className="text-sm text-slate-500">Monitor bookings, assign therapists, and track service quality.</p>
         </div>
-        <Button variant="outline" onClick={() => console.info("Export CSV requested")}>Export CSV</Button>
+        <Button variant="outline" onClick={() => logger.info("Export CSV requested")}>Export CSV</Button>
       </header>
       <section className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
         <DispatchBoard board={board} />

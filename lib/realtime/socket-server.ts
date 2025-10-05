@@ -1,4 +1,5 @@
 import { Server as IOServer } from "socket.io";
+import { logger } from "@/lib/utils/logger";
 
 let io: IOServer | null = null;
 
@@ -17,7 +18,7 @@ interface TherapistLocation {
 
 export async function emitTherapistLocation(payload: TherapistLocation) {
   if (!io) {
-    console.warn("Socket server not initialised");
+    logger.warn("Socket server not initialised");
     return;
   }
   io.emit("therapist-location", payload);

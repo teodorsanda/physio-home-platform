@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { authSchemas } from "@/lib/sdk/schemas";
-import { buildResponse, parseJson, validateRequest } from "@/lib/validators/route";
+import { buildResponse, HttpError, parseJson, validateRequest } from "@/lib/validators/route";
 import { verifyPassword } from "@/lib/auth/password";
 import jwt from "jsonwebtoken";
 
@@ -13,11 +13,11 @@ export async function POST(req: NextRequest) {
     const data = validateRequest(authSchemas.login.body, body);
     const user = await prisma.user.findUnique({ where: { email: data.email } });
     if (!user) {
-      throw new Error("Invalid credentials");
+      throw new HttpError(401, "Invalid credentials");
     }
     const valid = await verifyPassword(data.password, user.passwordHash);
     if (!valid) {
-      throw new Error("Invalid credentials");
+      throw new HttpError(401, "Invalid credentials");
     }
     const token = jwt.sign({ sub: user.id, role: user.role }, JWT_SECRET, { expiresIn: "1h" });
     return { token, expiresIn: 3600 };
