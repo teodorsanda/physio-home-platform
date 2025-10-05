@@ -1,0 +1,13 @@
+{
+  "nav.home": "Acasă",
+  "nav.patient": "Aplicație pacienți",
+  "nav.therapist": "Aplicație terapeuți",
+  "nav.admin": "Operațiuni",
+  "cta.book": "Programează o vizită",
+  "cta.signup": "Creează cont",
+  "hero.title": "Kinetoterapie la tine acasă",
+  "hero.subtitle": "Kinetoterapeuți autorizați care oferă recuperare personalizată cu coordonare în timp real.",
+  "hero.button": "Începe recuperarea",
+  "footer.disclaimer": "Kinetix HomeCare nu înlocuiește serviciile medicale de urgență și nu oferă sfaturi medicale.",
+  "chatbot.prompt": "Întreabă-ne orice despre vizita ta. Nu oferim diagnostice medicale."
+}

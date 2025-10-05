@@ -1,0 +1,1077 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Kinetix HomeCare API",
+    "version": "0.1.0",
+    "description": "REST API for the home-visit physiotherapy platform"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "summary": "Register patient",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Registered user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "JWT token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/otp/request": {
+      "post": {
+        "summary": "Request OTP",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OtpRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP issued",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OtpResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/otp/verify": {
+      "post": {
+        "summary": "Verify OTP",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OtpVerifyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP verified",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OtpVerifyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patient/me": {
+      "get": {
+        "summary": "Get patient profile",
+        "responses": {
+          "200": {
+            "description": "Patient summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientSummary"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update patient onboarding",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatientUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patient/documents": {
+      "post": {
+        "summary": "Create document upload",
+        "responses": {
+          "200": {
+            "description": "Presigned fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresignResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bookings": {
+      "post": {
+        "summary": "Create booking",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookingCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Booking created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bookings/{id}": {
+      "get": {
+        "summary": "Get booking by ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Booking",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bookings/{id}/cancel": {
+      "patch": {
+        "summary": "Cancel booking",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookingCancel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cancel result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingActionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bookings/{id}/assign": {
+      "post": {
+        "summary": "Assign therapist",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookingAssign"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Assign result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingActionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bookings/{id}/checkin": {
+      "post": {
+        "summary": "Record check-in",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookingCheckin"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Check-in result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckinResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/therapist/me/schedule": {
+      "get": {
+        "summary": "Therapist schedule",
+        "responses": {
+          "200": {
+            "description": "Schedule data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TherapistSchedule"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/therapist/me/availability": {
+      "patch": {
+        "summary": "Update therapist availability",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TherapistAvailabilityUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Availability updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/therapist/route/{bookingId}/start": {
+      "post": {
+        "summary": "Start therapist route",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bookingId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RouteUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Route started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RouteResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payments/intent": {
+      "post": {
+        "summary": "Create Stripe payment intent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentIntentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Client secret",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentIntentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ops/board": {
+      "get": {
+        "summary": "Dispatcher board",
+        "responses": {
+          "200": {
+            "description": "Board data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DispatchBoard"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reports/kpis": {
+      "get": {
+        "summary": "Key performance indicators",
+        "responses": {
+          "200": {
+            "description": "KPIs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KpiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/therapists/verify": {
+      "post": {
+        "summary": "Verify therapist",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TherapistVerify"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Verification result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TherapistVerifyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RegisterRequest": {
+        "type": "object",
+        "required": ["email", "password", "fullName"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8
+          },
+          "fullName": {
+            "type": "string"
+          }
+        }
+      },
+      "RegisterResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "expiresIn": {
+            "type": "integer"
+          }
+        }
+      },
+      "OtpRequest": {
+        "type": "object",
+        "required": ["phone"],
+        "properties": {
+          "phone": {
+            "type": "string"
+          }
+        }
+      },
+      "OtpResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OtpVerifyRequest": {
+        "type": "object",
+        "required": ["phone", "code"],
+        "properties": {
+          "phone": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 6
+          }
+        }
+      },
+      "OtpVerifyResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "sessionId": {
+            "type": "string"
+          }
+        }
+      },
+      "PatientSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "openTickets": {
+            "type": "integer"
+          },
+          "upcomingBookings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BookingSummary"
+            }
+          },
+          "pastBookings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BookingSummary"
+            }
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PatientDocument"
+            }
+          }
+        }
+      },
+      "PatientUpdate": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "qualificationAnswers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "questionId": {
+                  "type": "string"
+                },
+                "answer": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "PresignResponse": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "fields": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "BookingCreate": {
+        "type": "object",
+        "required": ["patientId", "addressId", "scheduledStart", "therapistGenderPreference", "paymentMethodId"],
+        "properties": {
+          "patientId": {
+            "type": "string"
+          },
+          "addressId": {
+            "type": "string"
+          },
+          "scheduledStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "therapistGenderPreference": {
+            "type": "string",
+            "enum": ["Male", "Female", "Any"]
+          },
+          "notes": {
+            "type": "string"
+          },
+          "paymentMethodId": {
+            "type": "string"
+          },
+          "couponCode": {
+            "type": "string"
+          }
+        }
+      },
+      "BookingSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "therapistName": {
+            "type": "string"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "address": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Pending", "Assigned", "EnRoute", "InProgress", "Completed", "Cancelled", "NoShow"]
+          },
+          "paymentIntentClientSecret": {
+            "type": "string"
+          }
+        }
+      },
+      "BookingDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BookingSummary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "patient": {
+                "$ref": "#/components/schemas/RelatedPerson"
+              },
+              "therapist": {
+                "$ref": "#/components/schemas/RelatedPerson",
+                "nullable": true
+              },
+              "location": {
+                "$ref": "#/components/schemas/GeoPoint",
+                "nullable": true
+              },
+              "etaMinutes": {
+                "type": "integer",
+                "nullable": true
+              },
+              "otpCode": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "RelatedPerson": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "fullName": {
+            "type": "string"
+          }
+        }
+      },
+      "GeoPoint": {
+        "type": "object",
+        "properties": {
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          }
+        }
+      },
+      "BookingCancel": {
+        "type": "object",
+        "required": ["reason"],
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "BookingAssign": {
+        "type": "object",
+        "required": ["therapistId"],
+        "properties": {
+          "therapistId": {
+            "type": "string"
+          }
+        }
+      },
+      "BookingActionResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Pending", "Assigned", "EnRoute", "InProgress", "Completed", "Cancelled", "NoShow"]
+          }
+        }
+      },
+      "BookingCheckin": {
+        "type": "object",
+        "required": ["method"],
+        "properties": {
+          "method": {
+            "type": "string",
+            "enum": ["PatientApp", "QR", "OTP"]
+          },
+          "confirmationCode": {
+            "type": "string"
+          }
+        }
+      },
+      "CheckinResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "confirmedBy": {
+            "type": "string",
+            "enum": ["Patient", "Therapist"]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TherapistSchedule": {
+        "type": "object",
+        "properties": {
+          "therapistId": {
+            "type": "string"
+          },
+          "availability": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "dayOfWeek": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 6
+                },
+                "slots": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "start": {
+                        "type": "string"
+                      },
+                      "end": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "upcomingBookings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BookingSummary"
+            }
+          }
+        }
+      },
+      "TherapistAvailabilityUpdate": {
+        "type": "object",
+        "properties": {
+          "availability": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "dayOfWeek": {
+                  "type": "integer"
+                },
+                "slots": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "start": {
+                        "type": "string"
+                      },
+                      "end": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "SimpleResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RouteUpdate": {
+        "type": "object",
+        "required": ["location"],
+        "properties": {
+          "location": {
+            "$ref": "#/components/schemas/GeoPoint"
+          },
+          "heading": {
+            "type": "number"
+          },
+          "speed": {
+            "type": "number"
+          }
+        }
+      },
+      "RouteResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "etaMinutes": {
+            "type": "integer"
+          }
+        }
+      },
+      "PaymentIntentRequest": {
+        "type": "object",
+        "required": ["bookingId", "currency", "amount", "paymentMethodType"],
+        "properties": {
+          "bookingId": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "paymentMethodType": {
+            "type": "string"
+          }
+        }
+      },
+      "PaymentIntentResponse": {
+        "type": "object",
+        "properties": {
+          "clientSecret": {
+            "type": "string"
+          },
+          "publishableKey": {
+            "type": "string"
+          }
+        }
+      },
+      "DispatchBoard": {
+        "type": "object",
+        "properties": {
+          "unassigned": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BookingSummary"
+            }
+          },
+          "active": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BookingSummary"
+            }
+          }
+        }
+      },
+      "KpiResponse": {
+        "type": "object",
+        "properties": {
+          "conversionRate": {
+            "type": "number"
+          },
+          "onTimeArrivalRate": {
+            "type": "number"
+          },
+          "noShowRate": {
+            "type": "number"
+          },
+          "utilization": {
+            "type": "number"
+          },
+          "nps": {
+            "type": "number"
+          }
+        }
+      },
+      "TherapistVerify": {
+        "type": "object",
+        "required": ["therapistId", "approved"],
+        "properties": {
+          "therapistId": {
+            "type": "string"
+          },
+          "approved": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "TherapistVerifyResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "PatientDocument": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "uploadedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "secureUrl": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      }
+    }
+  }
+}
