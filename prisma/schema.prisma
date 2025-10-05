@@ -1,0 +1,253 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TherapistGender {
+  M
+  F
+}
+
+enum BookingStatus {
+  Pending
+  Assigned
+  EnRoute
+  InProgress
+  Completed
+  Cancelled
+  NoShow
+}
+
+enum GenderPreference {
+  Male
+  Female
+  Any
+}
+
+enum CheckInMethod {
+  PatientApp
+  QR
+  OTP
+}
+
+enum CheckInConfirmedBy {
+  Patient
+  Therapist
+}
+
+enum DocumentType {
+  DischargeLetter
+  ID
+  HealthCard
+  LabResult
+  Invoice
+}
+
+enum MessageChannel {
+  Chatbot
+  Human
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  phone        String?   @unique
+  passwordHash String
+  role         String
+  patient      Patient?
+  therapist    Therapist?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+}
+
+model Patient {
+  id             String    @id @default(cuid())
+  userId         String    @unique
+  user           User      @relation(fields: [userId], references: [id])
+  addresses      Address[]
+  bookings       Booking[]
+  documents      Document[]
+  qualification  Json?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+}
+
+model Therapist {
+  id              String       @id @default(cuid())
+  userId          String       @unique
+  user            User         @relation(fields: [userId], references: [id])
+  gender          TherapistGender
+  bio             String?
+  kycStatus       String        @default("Pending")
+  availability    Availability[]
+  bookings        Booking[]
+  documents       Document[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deletedAt       DateTime?
+}
+
+model Address {
+  id         String   @id @default(cuid())
+  patientId  String
+  patient    Patient  @relation(fields: [patientId], references: [id])
+  label      String
+  line1      String
+  line2      String?
+  city       String
+  county     String
+  postalCode String?
+  lat        Float
+  lng        Float
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  deletedAt  DateTime?
+
+  @@index([patientId])
+}
+
+model Availability {
+  id           String    @id @default(cuid())
+  therapistId  String
+  therapist    Therapist @relation(fields: [therapistId], references: [id])
+  dayOfWeek    Int
+  startTime    String
+  endTime      String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  @@index([therapistId, dayOfWeek])
+}
+
+model Booking {
+  id                       String         @id @default(cuid())
+  patientId                String
+  therapistId              String?
+  addressId                String
+  status                   BookingStatus  @default(Pending)
+  therapistGenderPreference GenderPreference
+  scheduledStart           DateTime
+  scheduledEnd             DateTime?
+  notes                    String?
+  payment                  Payment?
+  checkIns                 CheckIn[]
+  order                    Order?
+  auditLogs                AuditLog[]
+  createdAt                DateTime       @default(now())
+  updatedAt                DateTime       @updatedAt
+  deletedAt                DateTime?
+
+  patient   Patient   @relation(fields: [patientId], references: [id])
+  therapist Therapist? @relation(fields: [therapistId], references: [id])
+  address   Address   @relation(fields: [addressId], references: [id])
+
+  @@index([patientId])
+  @@index([therapistId])
+  @@index([status])
+}
+
+model CheckIn {
+  id          String              @id @default(cuid())
+  bookingId   String
+  booking     Booking             @relation(fields: [bookingId], references: [id])
+  method      CheckInMethod
+  confirmedBy CheckInConfirmedBy
+  lat         Float?
+  lng         Float?
+  confirmedAt DateTime            @default(now())
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+model Payment {
+  id             String    @id @default(cuid())
+  bookingId      String    @unique
+  booking        Booking   @relation(fields: [bookingId], references: [id])
+  stripeIntentId String?
+  amount         Int
+  currency       String
+  status         String
+  metadata       Json?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Document {
+  id          String       @id @default(cuid())
+  type        DocumentType
+  url         String
+  bucketKey   String
+  patientId   String?
+  therapistId String?
+  patient     Patient?     @relation(fields: [patientId], references: [id])
+  therapist   Therapist?   @relation(fields: [therapistId], references: [id])
+  extractedText String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+
+  @@index([patientId])
+  @@index([therapistId])
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Int
+  currency    String
+  vatRate     Float
+  deletedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Order {
+  id         String      @id @default(cuid())
+  patientId  String
+  total      Int
+  currency   String
+  status     String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  deletedAt  DateTime?
+  items      OrderItem[]
+  patient    Patient     @relation(fields: [patientId], references: [id])
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Int
+  order     Order    @relation(fields: [orderId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+}
+
+model Message {
+  id        String        @id @default(cuid())
+  channel   MessageChannel
+  userId    String?
+  user      User?         @relation(fields: [userId], references: [id])
+  payload   Json
+  createdAt DateTime      @default(now())
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorId     String?
+  actor       User?    @relation(fields: [actorId], references: [id])
+  entityType  String
+  entityId    String
+  action      String
+  metadata    Json?
+  createdAt   DateTime @default(now())
+}

@@ -1,0 +1,13 @@
+{
+  "nav.home": "Home",
+  "nav.patient": "Patient app",
+  "nav.therapist": "Therapist app",
+  "nav.admin": "Operations",
+  "cta.book": "Book a home visit",
+  "cta.signup": "Sign up",
+  "hero.title": "Physiotherapy that comes to your home",
+  "hero.subtitle": "Licensed Romanian physiotherapists delivering personalized rehab with realtime coordination.",
+  "hero.button": "Start your recovery",
+  "footer.disclaimer": "Kinetix HomeCare does not replace emergency services or medical advice.",
+  "chatbot.prompt": "Ask us anything about your upcoming physiotherapy visit. We cannot provide medical diagnoses."
+}
