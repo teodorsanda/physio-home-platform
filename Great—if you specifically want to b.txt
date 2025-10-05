@@ -1,0 +1,118 @@
+Great—if you specifically want to build it with OpenAI Codex, use the new GPT-5-Codex model via the Responses API and (optionally) attach Code Interpreter + File Search so the model can scaffold files, run build steps, and keep a tiny KB (FAQ, policies). (OpenAI)
+Below is a copy-paste Master Prompt tuned for Codex (concise, deterministic, repo-oriented), plus a ready Node.js snippet that calls the Responses API with the right tools.
+________________________________________
+Master Prompt for GPT-5-Codex (paste as a single user message)
+Role: You are an elite full-stack engineer (principal level).
+Goal: Generate a production-ready repository for a home-visit physiotherapy (kinetotherapy) platform.
+Deliver these apps (single repo):
+1.	Public website (marketing + AI chatbot)
+2.	Patient web app (booking, documents, payments, live tracking)
+3.	Therapist web app (schedule, routing, check-in, SOAP notes)
+4.	Admin/Operations dashboard (dispatch board, KYC, refunds, analytics)
+5.	Backend APIs (auth, bookings, documents, payments, realtime)
+Tech (opinionated defaults):
+•	Next.js 14 (App Router) + TypeScript, Tailwind + shadcn/ui
+•	Prisma + PostgreSQL, Redis (queues/sockets), MinIO (S3-compatible)
+•	REST routes under /api/* with Zod validation; generate OpenAPI 3 + a typed client /lib/sdk
+•	Auth: NextAuth (email+password) + phone OTP (Twilio adapter stub)
+•	Realtime: Socket.IO (therapist live location)
+•	Payments: Stripe (test mode; Apple/Google Pay ready)
+•	Maps: Google Maps JS SDK + Directions/Distance Matrix (abstract provider layer)
+•	OCR: Tesseract via worker (BullMQ/Redis)
+•	Security: RBAC, per-field PHI/PII masking, rate limiting, AuditLog for all sensitive reads/writes
+•	i18n: EN default, RO ready (keys in /i18n)
+Must-have product features:
+•	Patient onboarding + qualification questions
+•	Personal data + document upload (DischargeLetter, ID, HealthCard, LabResult) → virus scan (ClamAV) → OCR → secure URL
+•	Booking: address on map, date/time, therapist gender preference (Male/Female/Any), payment, coupons
+•	“Glovo-style” live tracking once therapist starts route; ETA via Distance Matrix
+•	Check-in: patient in-app confirm or OTP; save timestamp + geotag
+•	Patient help center with AI chatbot; never give medical advice; escalate to human contact form
+•	Therapist: KYC/licensure, availability, start route (broadcast {lat,lng,heading,speed} every 5–10s), QR/OTP check-in, SOAP notes + post-visit report, earnings (read-only)
+•	Admin: live dispatcher board (map + unassigned queue + drag assign), bookings CRUD, refunds, KYC review, products/coupons, invoices (PDF), VAT fields, CSV exports
+•	Analytics: conversion, on-time arrival, no-shows, utilization, NPS
+Data model (Prisma) with indices + soft delete:
+User, Patient, Therapist(gender enum[M,F]), Address(GeoPoint), Availability, Booking(status enum[Pending,Assigned,EnRoute,InProgress,Completed,Cancelled,NoShow], genderPreference enum[Male,Female,Any]), CheckIn(method enum[PatientApp,QR,OTP], confirmedBy enum[Patient,Therapist]), Payment, Document(type enum[DischargeLetter,ID,HealthCard,LabResult,Invoice]), Product, Order, OrderItem, Message(channel enum[Chatbot,Human]), AuditLog.
+APIs (examples):
+•	Auth: POST /api/auth/register|login|otp/request|otp/verify
+•	Patient: GET/PUT /api/patient/me, POST /api/patient/documents (presign)
+•	Bookings: POST /api/bookings, GET /api/bookings/:id, PATCH /api/bookings/:id/cancel, POST /api/bookings/:id/assign, POST /api/bookings/:id/checkin (OTP|QR|patient-confirm)
+•	Therapist: GET /api/therapist/me/schedule, PATCH /api/therapist/me/availability, POST /api/therapist/route/:bookingId/start (+ WS)
+•	Payments: POST /api/payments/intent, POST /api/payments/webhook (Stripe test)
+•	Admin: GET /api/ops/board, GET /api/reports/kpis, POST /api/therapists/verify
+•	Privacy: GET /api/privacy/export, POST /api/privacy/delete-request
+DevOps & DX (must implement)
+•	Docker Compose: postgres, redis, minio, clamav, web, worker
+•	Healthchecks so Prisma waits for Postgres
+•	Makefile (idempotent targets):
+docker-up:
+	docker compose up -d --build
+	docker compose ps
+
+migrate:
+	npx prisma migrate deploy || npx prisma migrate dev --name init
+
+seed:
+	node scripts/seed.js || npx ts-node scripts/seed.ts
+
+dev:
+	pnpm dev || npm run dev
+
+docker-down:
+	docker compose down -v
+•	Acceptance path (must work):
+make docker-up && sleep 10 && make migrate && make seed && make dev
+•	Seeds: 3 cities, 10 therapists (5M/5F), 15 patients, 10 upcoming bookings, 5 past (with invoices)
+•	Tests: unit (core), API e2e (auth, booking, payments webhook), UI smoke
+•	README with env table + demo accounts + troubleshooting
+•	.env.example including DB, Redis, S3/MinIO, Stripe test keys, Maps key, NextAuth, JWT, SMTP, SMS
+Guardrails
+•	Never output medical advice; on red flags, instruct patient to contact licensed care.
+•	Mask PHI/PII in logs; store documents encrypted; provide DPIA.md, RoPA.md, breach checklist in /docs.
+•	If an external key is missing in local dev, render a friendly stub and continue.
+Output now:
+1.	Full repository code & structure
+2.	OpenAPI spec + /lib/sdk typed client
+3.	Clear run instructions (must match the Makefile)
+________________________________________
+Quick start code (Node.js, Responses API with Codex)
+import OpenAI from "openai";
+
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// Optional: enable tools so Codex can run shell/python (Code Interpreter) and read your FAQ files.
+const tools: any[] = [
+  { type: "code_interpreter" },
+  { type: "file_search" }
+];
+
+async function buildRepoWithCodex(masterPrompt: string) {
+  const resp = await client.responses.create({
+    model: "gpt-5-codex",        // Coding-specialized model
+    tools,                       // lets Codex execute code & read files if you attach them
+    input: [
+      {
+        role: "user",
+        content: masterPrompt
+      }
+    ],
+    // (optional) Structured output requests or JSON mode for plan steps
+  });
+
+  // If you stream, handle tool calls + file outputs here.
+  console.log(resp.output_text);
+}
+
+buildRepoWithCodex(process.argv.slice(2).join(" ") || "<<<PASTE MASTER PROMPT HERE>>>");
+Notes
+•	GPT-5-Codex is delivered via the Responses API. Use tools like Code Interpreter for repo bootstrap & tests and File Search for a small docs/FAQ KB. (OpenAI)
+•	If you need massive context or mixed coding+reasoning, GPT-4.1 (and the o-series) are strong coding models as well; you can swap models without changing your prompt style. (OpenAI)
+•	For constrained schemas (e.g., plan JSON), use Structured Outputs. (OpenAI Platform)
+________________________________________
+Handy follow-ups (use as new prompts to Codex)
+•	“Generate the Prisma schema and first migration for the described data model.”
+•	“Implement /api/bookings create + validation + happy-path e2e test.”
+•	“Add the dispatcher board map with Socket.IO live markers and fake coordinates if GOOGLE_MAPS_API_KEY is missing.”
+•	“Write scripts/seed.ts with realistic Romanian cities and travel radii.”
+If you want, I can also give you a minimal seed of .env.example and a GitHub Actions file ready for push.
+
