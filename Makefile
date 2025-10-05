@@ -13,11 +13,10 @@ migrate:
 npx prisma migrate deploy || npx prisma migrate dev --name init
 
 seed:
-npx prisma generate
-npx tsx scripts/seed.ts
+node scripts/seed.js || npx ts-node scripts/seed.ts
 
 dev:
-$(package_manager) run dev
+pnpm dev || npm run dev
 
 build:
 $(package_manager) run build
