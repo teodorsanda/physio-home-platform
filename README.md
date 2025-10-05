@@ -50,6 +50,7 @@ cp .env.example .env.local
 | `GOOGLE_MAPS_API_KEY` / `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Google Maps (server & client) | `AIza...` |
 | `NEXT_PUBLIC_API_BASE_URL` | Base URL for the typed REST SDK | `http://localhost:3000` |
 | `NEXT_PUBLIC_REALTIME_URL` | Socket.IO endpoint exposed to clients | `http://localhost:3000` |
+| `OPENAI_API_KEY` | Optional key powering the concierge chatbot (stubbed if empty) | _empty_ |
 
 ### Makefile workflow
 The project ships with idempotent make targets:
